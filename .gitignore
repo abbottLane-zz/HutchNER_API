@@ -1,0 +1,10 @@
+# Created by .ignore support plugin (hsz.mobi)
+/NERResources/
+/LSTMExec/results/
+/LSTMExec/pre_trainedVectorEmbeddings/
+/LSTMExec/models/
+/NERScripts/csvdata/
+/NERResults/
+/NEREvaluation/EvalResults/
+/Database/test.sqlite
+/Database/

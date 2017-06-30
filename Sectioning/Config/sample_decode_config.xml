@@ -1,0 +1,35 @@
+<config>
+	<bio-text-features>
+		<feature>isAllCaps</feature>
+		<feature>isTitleCaps</feature>
+		<feature>containsNumber</feature>
+		<feature>beginsWithNumber</feature>
+		<feature>numTokens</feature>
+		<feature>numPreNewlines</feature>
+		<feature>numPostNewlines</feature>
+		<feature>firstToken</feature>
+		<feature>secondToken</feature>
+		<feature>unigram</feature>
+	</bio-text-features>
+	<bio-tag-features>
+		<feature>prevTag</feature>
+		<feature>prevTwoTags</feature>
+		<feature>numPrevTagRepeats</feature>
+	</bio-tag-features>
+	<section-text-features>
+		<feature>isHeaderAllCaps</feature>
+		<feature>isHeaderTitleCaps</feature>
+		<feature>headerContainsNumber</feature>
+		<feature>headerBeginsWithNumber</feature>
+		<feature>numHeaderTokens</feature>
+		<feature>numHeaderPreNewlines</feature>
+		<feature>numHeaderPostNewlines</feature>
+		<feature>firstHeaderToken</feature>
+		<feature>secondHeaderToken</feature>
+		<feature>headerUnigram</feature>
+	</section-text-features>
+	<section-tag-features>
+	</section-tag-features>
+	<ApproachType>TWO_STEP</ApproachType>
+	<BeamSearch beamSize="2" k="15" n="7"/>
+</config>	

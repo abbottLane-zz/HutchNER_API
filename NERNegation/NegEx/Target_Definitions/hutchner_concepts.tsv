@@ -1,0 +1,2 @@
+Lex	Type	Regex	Direction	Codes
+hutchner_concept	HUTCHNER_CONCEPT	<span name=.*?</span>		concept_c
