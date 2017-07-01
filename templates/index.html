@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block body %}
+<html lang="en">
+
+<body>
+    <h1>HutchNER Clinical NER Demo</h1>
+    <form id="textform" >
+        <textarea name="text" cols="55" rows="10" id="textblock">HISTORY OF PRESENT ILLNESS: Mr. Bob is a 1000000-year-old gentleman with coronary artery disease, hypertension, hypercholesterolemia, COPD and tobacco abuse. He reports doing well. He did have some more knee pain for a few weeks, but this has resolved. He is having more trouble with his sinuses. I had started him on Flonase back in December. He says this has not really helped. Over the past couple weeks he has had significant congestion and thick discharge. No fevers or headaches but does have diffuse upper right-sided teeth pain. He denies any chest pains, nausea, PND, orthopnea, edema or syncope. His breathing is doing fine. No cough. He continues to smoke about half-a-pack per day. He plans on trying the patches again.
+
+CURRENT MEDICATIONS: Updated on CIS. They include aspirin, atenolol, Lipitor, Advair, Spiriva, albuterol and will add Singulair today.
+
+ALLERGIES: Sulfa caused a rash.
+        </textarea>
+        <input type="button" value="Submit" id="submit">
+    </form>
+    <div id="resultarea" align="left" style="border:1px solid green" ></div>
+</body>
+</html>
+{% endblock %}

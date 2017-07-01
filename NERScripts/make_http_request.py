@@ -17,10 +17,10 @@ def load_data(data_dir):
 
 url = 'https://nlp-brat-prod01.fhcrc.org/hutchner/ner_neg/crf'
 data_dir = "/home/wlane/nethome/i2b2_data/2010_concepts_plusFH/test/txt"
-data = load_data(data_dir)
-# data = {
-#         "1234":"the patient experienced no chest pressure or pain or dyspnea, or pain, or dyspnea, or pain."
-#     }
+# data = load_data(data_dir)
+data = {
+        "1234":"the patient experienced no chest pressure or pain or dyspnea, or pain, or dyspnea"
+    }
 headers = {"Content-Type: application/json"}
 response = requests.get(url, json=data,auth=HTTPBasicAuth("wlane","python"))
 

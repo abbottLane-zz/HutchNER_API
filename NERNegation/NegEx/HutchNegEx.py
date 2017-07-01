@@ -38,7 +38,7 @@ class HutchNegEx(object):
                     list_pattern_dicts.append({
                         column_names[0]:row[0],
                         column_names[1]:row[1],
-                        column_names[2]:re.compile('\s+'+row[2]+'(\s+|\.|\?)', re.IGNORECASE),
+                        column_names[2]:re.compile('\s*'+row[2]+'(\s+|\.|\?)', re.IGNORECASE),
                         column_names[3]:row[3],
                         column_names[4]:row[4],
                         column_names[5]:row[5],
@@ -47,7 +47,7 @@ class HutchNegEx(object):
                     })
                 else:
                     list_pattern_dicts.append({
-                        column_names[0]: re.compile('\s+'+row[0]+'(\s+|\.|\?|:)', re.IGNORECASE),
+                        column_names[0]: re.compile('\s*'+row[0]+'(\s+|\.|\?|:)', re.IGNORECASE),
                         column_names[1]: row[1],
                         column_names[2]: row[2],
                         column_names[3]: row[3],
@@ -153,7 +153,7 @@ class HutchNegEx(object):
                 current_word = label_toks[i]['text']
                 if current_word in window_breakers:
                     return
-                while label_toks[i]['label'] != "O":
+                while i < len(label_toks) and label_toks[i]['label'] != "O":
                     label_toks[i] = self._add_negation_label(label_toks[i], label)
                     i += 1
 

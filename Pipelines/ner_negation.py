@@ -34,7 +34,7 @@ if __name__ == '__main__':
     data_dir = "/home/wlane/nethome/i2b2_data/2010_concepts_plusFH/test/txt"
     #docs= load_data(data_dir)
     docs = {
-         "1234":"He is on erlotinib"
+         "1234":"the patient experienced no chest pressure or pain or dyspnea, or pain, or dyspnea, or pain"
     }
     response = main(documents=docs, model_type='crf', spacy_model=spacy_model)
     print json.dumps(response, sort_keys=True, indent=2)
