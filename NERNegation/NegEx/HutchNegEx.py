@@ -144,7 +144,7 @@ class HutchNegEx(object):
 
     def _scope_crawl_forward(self,t2, scope, label_toks, label):
         window_wideners = {",", ";", ":", "or"}
-        window_breakers = {".", "but", "\n", "and"} # 'And' in the context of negation almost always serves as
+        window_breakers = {".", "but", "\n", "and","except"} # 'And' in the context of negation almost always serves as
                                                     #  a clausal conjunction, not a continuation of a negated list.
                                                     # 'or' is always used for continuation of a negation list.
         scope = self._recalculate_scope(t2, scope, window_wideners, label_toks)

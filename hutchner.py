@@ -78,7 +78,12 @@ def load_data(data_dir):
 
 def json2html(json):
     colors = {"problem":"#ff6174","treatment":"#9df033", "test":"#61e9ff"}
-    header=""
+    header="<span style=\"color:#f44141\">Definite Negated</span> " \
+           "<span style=\"color:#ff7c00\">Probable Negated</span> " \
+           "<span style=\"color:#ffec48\">Ambivalent Negated</span> " \
+           "<span style=\"background-color:#ff6174\">Problem</span> " \
+           "<span style=\"background-color:#9df033\">Treatment</span> " \
+           "<span style=\"background-color:#61e9ff\">Test</span><br><br> "
     tokens = json['1']['NER_labels']
     text = json['1']['text']
     in_span=False
@@ -101,7 +106,12 @@ def json2html(json):
 
 def insert_negation(token):
     if "negation" in token:
-        return ";color:#f44141 "
+        if "DEFINITE" in token["negation"]:
+            return ";color:#f44141 "
+        elif "AMBIVALENT" in token["negation"]:
+            return ";color:#ffec48"
+        else:
+            return ";color:#ff7c00"
     else:
         return ""
 
