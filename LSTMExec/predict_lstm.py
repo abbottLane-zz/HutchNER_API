@@ -6,27 +6,12 @@
 #
 import os
 import time
-import codecs
 import optparse
 import numpy as np
 from loader import prepare_sentence
 from utils import create_input, iobes_iob, zero_digits
-from model import Model
 
 def main(document_objs, model):
-    # Load existing model
-    print "Loading model..."
-    parameters = model.parameters
-
-    # Load reverse mappings
-    word_to_id, char_to_id, tag_to_id = [
-        {v: k for k, v in x.items()}
-        for x in [model.id_to_word, model.id_to_char, model.id_to_tag]
-        ]
-
-    # Load the model
-    _, f_eval = model.build(training=False, **parameters)
-    model.reload()
     pred_tuples_by_doc_id = dict()
     start = time.time()
     print 'Tagging...'
@@ -35,7 +20,7 @@ def main(document_objs, model):
 
     for id, doc in document_objs.items():
         doc_count +=1
-        pred_tuples_by_doc_id[id]=tag_document(doc, parameters, model, f_eval, word_to_id, char_to_id)
+        pred_tuples_by_doc_id[id]=tag_document(doc, model['parameters'], model['model'], model['f_eval'], model['word_to_id'], model['char_to_id'])
 
     print '---- %i documents tagged in %.4fs ----' % (doc_count, time.time() - start)
     return pred_tuples_by_doc_id

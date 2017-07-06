@@ -39,7 +39,7 @@ class NERExtraction:
         """
         if self.model_algo.lower() == "lstm": # Use the LSTM model and decoder
             docs = self.documents
-            tags_and_toks_by_doc_id = predict_lstm.main(docs, models["lstm_crf"])
+            tags_and_toks_by_doc_id = predict_lstm.main(docs, models["lstm_ner"])
             docs = self._combine_docs_and_predictions(docs, tags_and_toks_by_doc_id)
             print ("Finished LSTM classification")
             return docs

@@ -70,8 +70,8 @@ textarea{
             $.ajax({
                     url: ".",
                     type: "POST",
-                    data: $("#textblock").val(),
-                    contentType: 'text/plain',
+                    data: JSON.stringify({text:$("#textblock").val(), algo:$("#algo_type").val()}),
+                    contentType: 'application/json; charset=utf-8',
                     success: function(result) {
                         var myDiv = $('#resultarea');
                         myDiv.html(result);

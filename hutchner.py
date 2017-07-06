@@ -28,14 +28,41 @@ from Pipelines import ner_negation, ner
 from flask_oauthlib.provider import OAuth2Provider
 import en_core_web_sm
 
-app = Flask(__name__)
-oauth=OAuth2Provider(app)
+def load_lstm_model(model_dir):
+    model = Model(model_path=model_dir)
+    # Load existing model
+    print "Loading model..."
+    parameters = model.parameters
+
+    # Load reverse mappings
+    word_to_id, char_to_id, tag_to_id = [
+        {v: k for k, v in x.items()}
+        for x in [model.id_to_word, model.id_to_char, model.id_to_tag]
+    ]
+
+    # Load the model
+    _, f_eval = model.build(training=False, **parameters)
+    model.reload()
+    return {"model":model,
+            "f_eval":f_eval,
+            "word_to_id":word_to_id,
+            "char_to_id":char_to_id,
+            "tag_to_id":tag_to_id,
+            "parameters":parameters}
+
+
 
 # initialize large models on server startup
 spacy_model = en_core_web_sm.load()
-lstm_ner_model= Model(model_path=os.path.join(os.path.dirname(__file__), os.path.join("..","LSTMExec","models","i2b2_fh_50_newlines")))
-crf_ner_model= joblib.load(os.path.join(os.path.dirname(__file__), os.path.join("..", "NERResources","Models")))
+lstm_ner_model= load_lstm_model(model_dir=os.path.join(os.path.dirname(__file__), os.path.join("LSTMExec","models","i2b2_fh_50_newlines")))
+crf_ner_model= joblib.load(os.path.join(os.path.dirname(__file__), os.path.join("NERResources","Models", "model-test_problem_treatment_.pk1")))
 models={"crf_ner":crf_ner_model, "lstm_ner":lstm_ner_model, "spacy":spacy_model}
+
+
+
+app = Flask(__name__)
+oauth=OAuth2Provider(app)
+
 
 
 
@@ -75,18 +102,28 @@ def not_found():
 #########################
 ### HutchNER Demo App ###
 #########################
+
+# @app.route('/demo/', methods=['GET'])
+# def handle_data():
+#     projectpath = request.form['testval']
+#     print "HEY! i got it:" + str(projectpath)
+
 @app.route('/demo/')
 def index():
     return render_template('index.html', **locals())
 
 
-@app.route('/demo/', methods=['POST'])
+@app.route('/demo/', methods=['POST', 'GET'])
 def submit_textarea():
-    url = 'https://nlp-brat-prod01.fhcrc.org/hutchner/ner_neg/crf'
-    data={"1":request.data}
-    headers = {"ontent-Type": "application/json"}
+    url = 'https://nlp-brat-prod01.fhcrc.org/hutchner/ner_neg/'
+    json_request_data = json.loads(request.data)
+    algo_type = json_request_data['algo']
+    url += algo_type
+    data={"1":json_request_data['text']}
+    headers = {"content-type": "application/json"}
     response = requests.get(url, json=data, headers=headers)
     p_response = json.loads(response.text)
+    #contentType: 'text/plain',
     return json2html(p_response)
 
 
