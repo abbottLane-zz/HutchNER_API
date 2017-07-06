@@ -1,3 +1,7 @@
+# Copyright (c) 2016-2017 Fred Hutchinson Cancer Research Center
+#
+# Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+#
 import csv
 with open('300PtsWithDxInfo.csv', 'rb') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')

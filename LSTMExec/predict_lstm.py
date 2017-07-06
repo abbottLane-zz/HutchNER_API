@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# Copyright (c) 2016-2017 Fred Hutchinson Cancer Research Center
+#
+# Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+#
 import os
 import time
 import codecs
@@ -9,10 +13,9 @@ from loader import prepare_sentence
 from utils import create_input, iobes_iob, zero_digits
 from model import Model
 
-def main(document_objs, model_dir):
+def main(document_objs, model):
     # Load existing model
     print "Loading model..."
-    model = Model(model_path=model_dir)
     parameters = model.parameters
 
     # Load reverse mappings

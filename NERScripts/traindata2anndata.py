@@ -1,3 +1,7 @@
+# Copyright (c) 2016-2017 Fred Hutchinson Cancer Research Center
+#
+# Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+#
 """This script takes in a TSV/CSV file (EG one output by txt2tsv.py), and a tsv file containing the patient-level
 gold standard from which to extract the diagnosis name, finds all documents with occurrences matching the diagnosis
 description.

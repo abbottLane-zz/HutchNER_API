@@ -1,10 +1,29 @@
 #!flask/bin/python
+''' author@wlane '''
+# Copyright (c) 2016-2017 Fred Hutchinson Cancer Research Center
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 import os
 
 import requests
 from flask import Flask, make_response, jsonify, request, render_template, g, json
 from os.path import isfile, join
 
+from sklearn.externals import joblib
+
+from LSTMExec.model import Model
 from Pipelines import ner_negation, ner
 from flask_oauthlib.provider import OAuth2Provider
 import en_core_web_sm
@@ -12,8 +31,13 @@ import en_core_web_sm
 app = Flask(__name__)
 oauth=OAuth2Provider(app)
 
-# initialize spacy for preprocessing
+# initialize large models on server startup
 spacy_model = en_core_web_sm.load()
+lstm_ner_model= Model(model_path=os.path.join(os.path.dirname(__file__), os.path.join("..","LSTMExec","models","i2b2_fh_50_newlines")))
+crf_ner_model= joblib.load(os.path.join(os.path.dirname(__file__), os.path.join("..", "NERResources","Models")))
+models={"crf_ner":crf_ner_model, "lstm_ner":lstm_ner_model, "spacy":spacy_model}
+
+
 
 #################
 ### Endpoints ###
@@ -22,8 +46,8 @@ spacy_model = en_core_web_sm.load()
 def ner_pipeline(alg_type):
     documents = request.json
     if documents:
-        json_response = ner.main(documents, alg_type, spacy_model)
-        return str(json_response)
+        json_response = ner.main(documents, alg_type, models)
+        return json_response.encode('utf-8')
     else:
         return make_response(jsonify({'error': 'No data provided'}), 400)
 
@@ -32,7 +56,7 @@ def ner_pipeline(alg_type):
 def ner_negation_pipeline(alg_type):
     documents = request.json
     if documents:
-        json_response = ner_negation.main(documents, alg_type, spacy_model)
+        json_response = ner_negation.main(documents, alg_type, models)
         return json_response.encode('utf-8')
     else:
         return make_response(jsonify({'error': 'No data provided'}), 400)
@@ -77,21 +101,31 @@ def load_data(data_dir):
 
 
 def json2html(json):
-    colors = {"problem":"#ff6174","treatment":"#9df033", "test":"#61e9ff"}
+    problem_color = "#DDA0DD"
+    treatment_color = "#9df033"
+    test_color = "#61e9ff"
+    colors = {"problem": problem_color,
+              "treatment": treatment_color,
+              "test": test_color,
+              "b-problem": problem_color,
+              "i-problem": problem_color,
+              "b-treatment": treatment_color,
+              "i-treatment": treatment_color,
+              "b-test": test_color,
+              "i-test": test_color}
     header="<span style=\"color:#f44141\">Definite Negated</span> " \
            "<span style=\"color:#ff7c00\">Probable Negated</span> " \
            "<span style=\"color:#ffec48\">Ambivalent Negated</span> " \
-           "<span style=\"background-color:#ff6174\">Problem</span> " \
+           "<span style=\"background-color:#DDA0DD\">Problem</span> " \
            "<span style=\"background-color:#9df033\">Treatment</span> " \
            "<span style=\"background-color:#61e9ff\">Test</span><br><br> "
     tokens = json['1']['NER_labels']
-    text = json['1']['text']
     in_span=False
     for token in tokens:
         if not in_span:
             if token['label'] != "O":
                 in_span=True
-                header+= "<span type=\""+token['label']+"\" style=\"background-color:"+colors[token['label']]+ insert_negation(token)+"\">"
+                header+= "<span type=\""+token['label']+"\" style=\"background-color:"+colors[token['label'].lower()]+ insert_negation_color(token)+"\">"
 
         if in_span:
             if token['label'] =="O":
@@ -104,7 +138,7 @@ def json2html(json):
     return header
 
 
-def insert_negation(token):
+def insert_negation_color(token):
     if "negation" in token:
         if "DEFINITE" in token["negation"]:
             return ";color:#f44141 "

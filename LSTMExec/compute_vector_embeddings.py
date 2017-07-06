@@ -1,4 +1,6 @@
-__author__ = 'raghav'
+# Copyright (c) 2016-2017 Fred Hutchinson Cancer Research Center
+#
+# Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 # This file is used to compute the pretrained vector embeddings in the format
 # It's expecting each line to have a word and a vector separated by a space. e.g.
 # pizza oFZJvTg5KL1D2188TLuNPXvpJL3YZI49bFeWvL8RjbzOo5s94I7aPIzzHj0zaIw7MFl6PTka7b3+sne8asDvPEPb37wJC5E7hwPIPKBWyby4yIU9CHRqvVwu4Tu5q

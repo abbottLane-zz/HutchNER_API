@@ -1,8 +1,11 @@
+# Copyright (c) 2016-2017 Fred Hutchinson Cancer Research Center
+#
+# Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+#
 import os
 
 from flask import json
 from os.path import isfile, join
-
 from DataLoading.JSONDataLoader import JSONDataLoader
 from NERExtraction.Extraction import NERExtraction
 
@@ -34,7 +37,7 @@ if __name__ == '__main__':
     data_dir = "/home/wlane/nethome/i2b2_data/2010_concepts_plusFH/test/txt"
     #docs= load_data(data_dir)
     docs = {
-         "1234":"the patient experienced no chest pressure or pain or dyspnea, or pain, or dyspnea, or pain"
+         "1234":"James had a resection, after which we prescribed him tylenol for the pain."
     }
     response = main(documents=docs, model_type='crf', spacy_model=spacy_model)
     print json.dumps(response, sort_keys=True, indent=2)

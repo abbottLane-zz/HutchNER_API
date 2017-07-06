@@ -1,12 +1,15 @@
+# Copyright (c) 2016-2017 Fred Hutchinson Cancer Research Center
+#
+# Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+#
+
 import time
+from DataLoading.i2b2DataLoading import i2b2DataLoader
+from NEREvaluation.Evaluation import NEREvaluator
+from NERExtraction.Extraction import NERExtraction
+from NERUtilities import ArgumentParsingSettings
 
-from HutchNER.NERPreprocessing.DocumentPreprocessing import i2b2DocumentPreprocessor
-
-from HutchNER.DataLoading.i2b2DataLoading import i2b2DataLoader
-from HutchNER.NEREvaluation.Evaluation import NEREvaluator
-from HutchNER.NERExtraction.Extraction import NERExtraction
-from HutchNER.NERUtilities import ArgumentParsingSettings
-from HutchNER.NERUtilities.DocumentPrinter import HTMLPrinter
+from NERUtilities.DocumentPrinter import HTMLPrinter
 
 
 def main():

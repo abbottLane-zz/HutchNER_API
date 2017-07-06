@@ -1,3 +1,7 @@
+# Copyright (c) 2016-2017 Fred Hutchinson Cancer Research Center
+#
+# Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+#
 import json
 import os
 from os.path import isfile, join
@@ -28,41 +32,33 @@ class NERExtraction:
         self.model_paths_by_concepts= None
         self.model_dir = None
 
-    def tag_all(self):
+    def tag_all(self, models):
         """
         Initiates concept extraction testing pipeline over all files in self.data_dir
         :return: list of Document objects where Document.predicted has been populated with CRF predictions
         """
         if self.model_algo.lower() == "lstm": # Use the LSTM model and decoder
-            self.model_dir=os.path.join(os.path.dirname(__file__), os.path.join("..","LSTMExec","models","i2b2_fh_50_newlines"))
             docs = self.documents
-            tags_and_toks_by_doc_id = predict_lstm.main(docs, self.model_dir)
+            tags_and_toks_by_doc_id = predict_lstm.main(docs, models["lstm_crf"])
             docs = self._combine_docs_and_predictions(docs, tags_and_toks_by_doc_id)
             print ("Finished LSTM classification")
             return docs
 
         elif self.model_algo.lower() == "crf": # USe CRF model and decoder
-            self.model_dir = os.path.join(os.path.dirname(__file__), os.path.join("..", "NERResources","Models"))
-            self.model_paths_by_concepts = self._modeldir2concepts(self.model_dir)
             docs = self.documents
-            for model_name in self.model_paths_by_concepts:
-                model_path = os.path.join(self.model_dir,self.model_paths_by_concepts[model_name])
-                self._extract(docs, model_path, model_name)
+            self._extract(docs, models["crf_ner"], "crf_ner")
             print("Finished CRF classification")
             return docs
 
-    def _extract(self, doc_objs_dict, model_path, model_name):
+    def _extract(self, doc_objs_dict, model, model_name):
         print "Pulling out " + model_name + " information ..."
-        print "\tOpening model at: " + model_path
-
-        crf = joblib.load(model_path)
-        self.possible_labels = list(crf.classes_)
+        self.possible_labels = list(model.classes_)
         self.possible_labels.remove("O")
         for i, current_doc in enumerate(doc_objs_dict.values()):
             # generate feature vectors
             feature_vectors = sent2features(current_doc.tokens, clusters=self.clusters)
             # Predict type sequence
-            result_probabilities = crf.predict_marginals_single(feature_vectors)
+            result_probabilities = model.predict_marginals_single(feature_vectors)
             # Set prediction in document object
             current_doc.set_NER_predictions(result_probabilities, model_name)
 
