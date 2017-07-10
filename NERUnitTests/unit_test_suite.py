@@ -2,11 +2,15 @@
 #
 # Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 #
+import os
 import unittest
 
 from collections import defaultdict
 
 import en_core_web_sm
+from sklearn.externals import joblib
+
+from LSTMExec.model import Model
 from NERExtraction.Extraction import NERExtraction
 
 from DataLoading.DataClasses import Document
@@ -291,6 +295,7 @@ class negex_tests(unittest.TestCase):
         self.dl=None
         self.loaded_docs=None
         self.negater=None
+        self.spacy_model=None
 
     def test_match_negations(self):
         # standard case

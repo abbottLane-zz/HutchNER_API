@@ -4,10 +4,10 @@
 #
 import os
 
-from HutchNER.NERPreprocessing.DocumentPreprocessing import i2b2DocumentPreprocessor
-
+import en_core_web_sm
+from NERPreprocessing.DocumentPreprocessing import i2b2DocumentPreprocessor
 from DataClasses import GoldAnnotation
-from HutchNER.DataLoading.TextDataLoading import TextDataLoader
+from DataLoading.TextDataLoading import TextDataLoader
 
 
 class i2b2DataLoader(TextDataLoader):
@@ -15,6 +15,8 @@ class i2b2DataLoader(TextDataLoader):
         super(i2b2DataLoader, self).__init__(txt_dir)
         self.annotation_dir = annotation_dir
         self.detected_labels = set()
+        self.spacy_model = en_core_web_sm.load()
+
 
     def load(self):
         '''
@@ -24,7 +26,7 @@ class i2b2DataLoader(TextDataLoader):
         docs = self.load_documents()
 
         # Sentence segmentation, tokenization, POS, dep parsing, etc (req'd before adding annotations)
-        i2b2DocumentPreprocessor(docs)
+        i2b2DocumentPreprocessor(docs,self.spacy_model)
 
         # Add annotations to document objects
         if self.annotation_dir:

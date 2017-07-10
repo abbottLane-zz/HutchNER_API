@@ -6,9 +6,8 @@ import csv
 import os
 from os.path import isfile, join
 
-from HutchNER.DataLoading.AbstractClasses import AbstractDataLoader
-from HutchNER.DataLoading.DataClasses import Document
-from HutchNER.NERPreprocessing.DocumentPreprocessing import UnformattedDocumentPreprocessor
+from DataLoading.AbstractClasses import AbstractDataLoader
+from DataLoading.DataClasses import Document
 
 
 class TextDataLoader(AbstractDataLoader):

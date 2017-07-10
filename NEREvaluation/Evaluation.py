@@ -6,6 +6,8 @@ import datetime
 import os
 import time
 
+from DataLoading.DataClasses import PredictedAnnotation
+
 
 class NEREvaluator:
     def __init__(self, tagged_documents, labels):
@@ -71,11 +73,13 @@ class NEREvaluator:
                 predicted_concepts = []
                 if label in doc.concepts_gold:
                     gold_concepts = doc.concepts_gold[label]
-                if label in doc.concepts_predicted:
-                    predicted_concepts = doc.concepts_predicted[label]
+                # if label in doc.concepts_predicted:
+                #     predicted_concepts = doc.concepts_predicted[label]
+                predicted_concepts = self.chunk_by_label(doc.NER_token_labels, self.labels)[label]
                 for gold in gold_concepts:
                     for predicted in predicted_concepts:
-                        if gold.stop == predicted.stop and \
+                        if predicted.label == label and \
+                                        gold.stop == predicted.stop and \
                                         gold.start == predicted.start and \
                                         gold.text in predicted.text:
                             tp += 1
@@ -85,11 +89,13 @@ class NEREvaluator:
                 predicted_concepts = []
                 if label in doc.concepts_gold:
                     gold_concepts = doc.concepts_gold[label]
-                if label in doc.concepts_predicted:
-                    predicted_concepts = doc.concepts_predicted[label]
+                # if label in doc.concepts_predicted:
+                #     predicted_concepts = doc.concepts_predicted[label]
+                predicted_concepts = self.chunk_by_label(doc.NER_token_labels, self.labels)[label]
                 for gold in gold_concepts:
                     for predicted in predicted_concepts:
-                        if gold.start <= predicted.stop and  \
+                        if predicted.label == label and \
+                                        gold.start <= predicted.stop and  \
                                         predicted.start <= gold.stop:
                             tp += 1
         return tp
@@ -102,12 +108,14 @@ class NEREvaluator:
                 predicted_concepts = []
                 if label in doc.concepts_gold:
                     gold_concepts = doc.concepts_gold[label]
-                if label in doc.concepts_predicted:
-                    predicted_concepts = doc.concepts_predicted[label]
+                # if label in doc.concepts_predicted:
+                #     predicted_concepts = doc.concepts_predicted[label]
+                predicted_concepts = self.chunk_by_label(doc.NER_token_labels, self.labels)[label]
                 for predicted in predicted_concepts:
                     found = False
                     for gold in gold_concepts:
-                        if gold.stop == predicted.stop and \
+                        if predicted.label == label and \
+                                        gold.stop == predicted.stop and \
                                         gold.start == predicted.start and \
                                         gold.text in predicted.text:
                             found = True
@@ -119,12 +127,14 @@ class NEREvaluator:
                 predicted_concepts = []
                 if label in doc.concepts_gold:
                     gold_concepts = doc.concepts_gold[label]
-                if label in doc.concepts_predicted:
-                    predicted_concepts = doc.concepts_predicted[label]
+                # if label in doc.concepts_predicted:
+                #     predicted_concepts = doc.concepts_predicted[label]
+                predicted_concepts = self.chunk_by_label(doc.NER_token_labels, self.labels)[label]
                 for predicted in predicted_concepts:
                     found = False
                     for gold in gold_concepts:
-                        if gold.start <= predicted.stop and \
+                        if predicted.label == label and \
+                                        gold.start <= predicted.stop and \
                                         predicted.start <= gold.stop:
                             found = True
                     if not found:
@@ -139,12 +149,14 @@ class NEREvaluator:
                 predicted_concepts = []
                 if label in doc.concepts_gold:
                     gold_concepts = doc.concepts_gold[label]
-                if label in doc.concepts_predicted:
-                    predicted_concepts = doc.concepts_predicted[label]
+                # if label in doc.concepts_predicted:
+                #     predicted_concepts = doc.concepts_predicted[label]
+                predicted_concepts = self.chunk_by_label(doc.NER_token_labels, self.labels)[label]
                 for gold in gold_concepts:
                     found = False
                     for predicted in predicted_concepts:
-                        if gold.stop == predicted.stop and \
+                        if predicted.label == label and \
+                                        gold.stop == predicted.stop and \
                                         gold.start == predicted.start and \
                                         gold.text in predicted.text:
                             found = True
@@ -156,12 +168,14 @@ class NEREvaluator:
                 predicted_concepts = []
                 if label in doc.concepts_gold:
                     gold_concepts = doc.concepts_gold[label]
-                if label in doc.concepts_predicted:
-                    predicted_concepts = doc.concepts_predicted[label]
+                # if label in doc.concepts_predicted:
+                #     predicted_concepts = doc.concepts_predicted[label]
+                predicted_concepts = self.chunk_by_label(doc.NER_token_labels, self.labels)[label]
                 for gold in gold_concepts:
                     found = False
                     for predicted in predicted_concepts:
-                        if gold.start <= predicted.stop and \
+                        if predicted.label == label and \
+                                        gold.start <= predicted.stop and \
                                         predicted.start <= gold.stop:
                             found = True
                     if not found:
@@ -191,3 +205,48 @@ class NEREvaluator:
         else:
             raise ValueError("There was an issue with your designated strictness level: " + strictness +
                              "\n\t Strictness levels must be derived from the domain {'exact', 'overlap'}")
+
+    def chunk_by_label(self, NER_token_labels, labels):
+        label_annot_dict = dict()
+        # initialize dict with {key=label:value=list()}
+        for label in labels:
+            label_annot_dict[label] = list()
+
+        for label in labels:
+            i=0
+            while i < len(NER_token_labels):
+                chunk = list()
+                while NER_token_labels[i]['label'] == label:
+                    chunk.append(NER_token_labels[i])
+                    i +=1
+                annotation = self.create_annot_from_chunk(chunk, label)
+                if annotation:
+                    label_annot_dict[label].append(annotation)
+                i += 1
+        return label_annot_dict
+
+
+    def create_annot_from_chunk(self, chunk, label):
+        if len(chunk)==0:
+            return None
+
+        global_begin =float('inf')
+        global_end = float('-inf')
+        full_string = ' '.join([x['text'] for x in chunk])
+        confidence = list()
+
+        for token in chunk:
+            if token['start'] <= global_begin:
+                global_begin=token['start']
+            if token['stop'] >= global_end:
+                global_end = token['stop']
+            confidence.append(token['confidence'])
+
+        confidence_avg = reduce(lambda x, y: x + y, confidence) / len(confidence) # calculate avg
+
+        return PredictedAnnotation(label,
+                                   global_begin,
+                                   global_end,
+                                   full_string,
+                                   doc_id=None,
+                                   prediction_confidence=confidence_avg)

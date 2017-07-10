@@ -4,10 +4,10 @@
 #
 import time
 
-from HutchNER.DataLoading.i2b2DataLoading import i2b2DataLoader
+from DataLoading.i2b2DataLoading import i2b2DataLoader
 
-from HutchNER.NERExtraction.Training import NERTrainer
-from HutchNER.NERUtilities import ArgumentParsingSettings
+from NERExtraction.Training import NERTrainer
+from NERUtilities import ArgumentParsingSettings
 
 
 def main():

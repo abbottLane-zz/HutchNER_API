@@ -24,9 +24,10 @@ from os.path import isfile, join
 from sklearn.externals import joblib
 
 from LSTMExec.model import Model
-from Pipelines import ner_negation, ner
+from Pipelines import ner_negation, ner, general_ner
 from flask_oauthlib.provider import OAuth2Provider
 import en_core_web_sm
+
 
 def load_lstm_model(model_dir):
     model = Model(model_path=model_dir)
@@ -50,25 +51,27 @@ def load_lstm_model(model_dir):
             "tag_to_id":tag_to_id,
             "parameters":parameters}
 
-
-
 # initialize large models on server startup
 spacy_model = en_core_web_sm.load()
 lstm_ner_model= load_lstm_model(model_dir=os.path.join(os.path.dirname(__file__), os.path.join("LSTMExec","models","i2b2_fh_50_newlines")))
-crf_ner_model= joblib.load(os.path.join(os.path.dirname(__file__), os.path.join("NERResources","Models", "model-test_problem_treatment_.pk1")))
+crf_ner_model= joblib.load(os.path.join(os.path.dirname(__file__), os.path.join("NERResources","Models", "model-test_problem_treatment.pk1")))
 models={"crf_ner":crf_ner_model, "lstm_ner":lstm_ner_model, "spacy":spacy_model}
-
-
 
 app = Flask(__name__)
 oauth=OAuth2Provider(app)
 
-
-
-
 #################
 ### Endpoints ###
 #################
+@app.route('/gen_ner/', methods=['GET'])
+def general_ner_pipeline():
+    documents = request.json
+    if documents:
+        json_response = general_ner.main(documents, models['spacy'])
+        return json_response.encode('utf-8')
+    else:
+        return make_response(jsonify({'error': 'No data provided'}), 400)
+
 @app.route('/ner/<string:alg_type>', methods=['GET'])
 def ner_pipeline(alg_type):
     documents = request.json

@@ -9,10 +9,10 @@ import sklearn_crfsuite
 from sklearn_crfsuite import metrics
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import RandomizedSearchCV
-from HutchNER.NERUtilities.MiscFunctions import CLUSTER_PATH
+from NERUtilities.MiscFunctions import CLUSTER_PATH
 
 from FeatureProcessing import sent2features
-from HutchNER.NERUtilities.Clusters import Clusters
+from NERUtilities.Clusters import Clusters
 from sklearn.externals import joblib
 
 
@@ -24,7 +24,7 @@ class NERTrainer(object):
         self.detected_labels = detected_labels
         self.annotated_data =docs
         self.clusters = Clusters(CLUSTER_PATH)
-        self.model_path = os.path.join("NERResources", "Models")
+        self.model_path = os.path.join("..","NERResources", "Models")
         self.optimize_hyperparams = optimize_hyperparams
 
     def train(self):
@@ -35,7 +35,8 @@ class NERTrainer(object):
             training_docs.append(doc_obj)
         print "Possible labels: ", str(self.detected_labels)
         #for type in self.detected_labels:
-        model_name = os.path.join(self.model_path, "model-" + self._get_model_type_name(self.detected_labels) + ".pk1")
+        model_n = "_".join(self.detected_labels)
+        model_name = os.path.join(self.model_path, "model-" + model_n + ".pk1")
         training_labels = self._get_training_labels(training_docs, self.detected_labels)
         x_train_list, y_train_list = self._get_features_and_labels(training_docs, training_labels)
 
@@ -80,8 +81,8 @@ class NERTrainer(object):
         #     trainer.append(xseq, yseq)
         print "Setting CRF Params for training " + model_name
         crf = sklearn_crfsuite.CRF(
-            c1=.303,  # 1.0,  # coefficient for L1 penalty
-            c2= .064,  # 1e-3,  # coefficient for L2 penalty
+            c1= 1.0,  # coefficient for L1 penalty
+            c2= 1e-3,  # coefficient for L2 penalty
             max_iterations= 200,  # stop earlier
             # include transitions that are possible, but not observed
             all_possible_transitions= True
