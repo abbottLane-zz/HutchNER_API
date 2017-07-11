@@ -106,10 +106,6 @@ def not_found():
 ### HutchNER Demo App ###
 #########################
 
-# @app.route('/demo/', methods=['GET'])
-# def handle_data():
-#     projectpath = request.form['testval']
-#     print "HEY! i got it:" + str(projectpath)
 
 @app.route('/demo/')
 def index():
@@ -121,13 +117,16 @@ def submit_textarea():
     url = 'https://nlp-brat-prod01.fhcrc.org/hutchner/ner_neg/'
     json_request_data = json.loads(request.data)
     algo_type = json_request_data['algo']
-    url += algo_type
+    if algo_type == "spacy_ner":
+        url = 'https://nlp-brat-prod01.fhcrc.org/hutchner/gen_ner/'
+    else:
+        url += algo_type
     data={"1":json_request_data['text']}
     headers = {"content-type": "application/json"}
     response = requests.get(url, json=data, headers=headers)
     p_response = json.loads(response.text)
     #contentType: 'text/plain',
-    return json2html(p_response)
+    return json2html(p_response, algo_type)
 
 
 def load_data(data_dir):
@@ -140,25 +139,62 @@ def load_data(data_dir):
     return data
 
 
-def json2html(json):
-    problem_color = "#DDA0DD"
-    treatment_color = "#9df033"
-    test_color = "#61e9ff"
-    colors = {"problem": problem_color,
-              "treatment": treatment_color,
-              "test": test_color,
-              "b-problem": problem_color,
-              "i-problem": problem_color,
-              "b-treatment": treatment_color,
-              "i-treatment": treatment_color,
-              "b-test": test_color,
-              "i-test": test_color}
-    header="<span style=\"color:#f44141\">Definite Negated</span> " \
-           "<span style=\"color:#ff7c00\">Probable Negated</span> " \
-           "<span style=\"color:#ffec48\">Ambivalent Negated</span> " \
-           "<span style=\"background-color:#DDA0DD\">Problem</span> " \
-           "<span style=\"background-color:#9df033\">Treatment</span> " \
-           "<span style=\"background-color:#61e9ff\">Test</span><br><br> "
+def json2html(json, algo):
+    colors = {"problem": "#DDA0DD",
+              "treatment": "#9df033",
+              "test": "#61e9ff",
+              "b-problem": "#DDA0DD",
+              "i-problem": "#DDA0DD",
+              "b-treatment": "#9df033",
+              "i-treatment": "#9df033",
+              "b-test": "#61e9ff",
+              "i-test": "#61e9ff",
+              "quantity":"#ff6699",
+              "gpe":"#9999ff",
+              "person":"#33ccff",
+              "norp":"#00cc99",
+              "facility":"#0099cc",
+              "org":"#99ff33",
+              "loc":"#cc00ff",
+              "product":"#ff0000",
+              "event":"#cc0099",
+              "work_of_art":"#3333ff",
+              "language":"#ccff33",
+              "date":"#339933",
+              "time":"#ccffff",
+              "percent":"#99cc00",
+              "money":"#cc33ff",
+              "ordinal":"#ff0066",
+              "cardinal":"#0099ff"
+              }
+
+    header=""
+    if algo == "crf" or algo =="lstm":
+        header="<span style=\"color:#f44141\">Definite Negated</span> " \
+               "<span style=\"color:#ff7c00\">Probable Negated</span> " \
+               "<span style=\"color:#ffec48\">Ambivalent Negated</span> " \
+               "<span style=\"background-color:#DDA0DD\">Problem</span> " \
+               "<span style=\"background-color:#9df033\">Treatment</span> " \
+               "<span style=\"background-color:#61e9ff\">Test</span><br><br> "
+    elif algo == "spacy_ner":
+        header ="<span style=\"background-color:#ff6699\">Quantity</span> " \
+               "<span style=\"background-color:#9999ff\">GPE</span> " \
+               "<span style=\"background-color:#33ccff\">Person</span> " \
+               "<span style=\"background-color:#00cc99\">NORP</span> " \
+               "<span style=\"background-color:#0099cc\">Facility</span> " \
+               "<span style=\"background-color:#99ff33\">Org</span><br><br> " \
+                "<span style=\"background-color:#cc00ff\">Loc</span> " \
+                "<span style=\"background-color:#ff0000\">Product</span> " \
+                "<span style=\"background-color:#cc0099\">Event</span> " \
+                "<span style=\"background-color:#3333ff\">work_of_art</span> " \
+                "<span style=\"background-color:#ccff33\">Language</span><br><br> " \
+                "<span style=\"background-color:#339933\">Date</span> " \
+                "<span style=\"background-color:#ccffff\">Time</span> " \
+                "<span style=\"background-color:#99cc00\">Percent</span> " \
+                "<span style=\"background-color:#9df033\">Money</span> " \
+                "<span style=\"background-color:#ff0066\">Ordinal</span><br><br> " \
+                "<span style=\"background-color:#0099ff\">Cardinal</span><br><br> "
+
     tokens = json['1']['NER_labels']
     in_span=False
     for token in tokens:
