@@ -56,6 +56,9 @@ def tag_document(doc, parameters, model, f_eval, word_to_id, char_to_id):
             # Write tags
             assert len(y_preds) == len(toks_text)
 
+            # strip IOB prefixes
+            y_preds = [x.split('-')[-1] for x in y_preds]
+
             all_ypreds.append(y_preds)
             all_tokens.append(toks_text)
 

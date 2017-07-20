@@ -6,7 +6,6 @@ import os
 
 import requests
 from flask import json
-from os.path import isfile, join
 from requests.auth import HTTPBasicAuth
 
 

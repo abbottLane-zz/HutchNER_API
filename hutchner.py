@@ -28,7 +28,9 @@ from Pipelines import ner_negation, ner, general_ner
 from flask_oauthlib.provider import OAuth2Provider
 import en_core_web_sm
 
-
+####################
+## Preload Models ##
+####################
 def load_lstm_model(model_dir):
     model = Model(model_path=model_dir)
     # Load existing model
@@ -125,7 +127,6 @@ def submit_textarea():
     headers = {"content-type": "application/json"}
     response = requests.get(url, json=data, headers=headers)
     p_response = json.loads(response.text)
-    #contentType: 'text/plain',
     return json2html(p_response, algo_type)
 
 
