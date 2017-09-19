@@ -36,6 +36,8 @@ class NERTrainer(object):
         print "Possible labels: ", str(self.detected_labels)
         #for type in self.detected_labels:
         model_n = "_".join(self.detected_labels)
+        if not os.path.exists(self.model_path):
+            os.makedirs(self.model_path)
         model_name = os.path.join(self.model_path, "model-" + model_n + ".pk1")
         training_labels = self._get_training_labels(training_docs, self.detected_labels)
         x_train_list, y_train_list = self._get_features_and_labels(training_docs, training_labels)

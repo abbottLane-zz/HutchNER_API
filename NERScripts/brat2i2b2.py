@@ -8,7 +8,7 @@ import spacy
 
 # directory where brat .txt and .ann files live
 in_dir = "/home/wlane/Applications/brat-v1.3_Crunchy_Frog/data/train_batch_20"
-out_dir = "/home/wlane/PycharmProjects/Testing_New_NLP_Tools/scripts/brat2i2b2_out"
+out_dir = "/home/wlane/PycharmProjects/HutchNER_API/NERScripts/b2i2b2_out"
 nlp = spacy.load('en')
 
 # read documents into memory
@@ -73,6 +73,9 @@ for did, txt in txt_dict.items():
 
     # consolidate list of sentence tokens into i2b2 format labels, write to file
     i2b2_entries_for_doc = list()
+
+    if not os.path.exists(os.path.join(out_dir,"con")):
+        os.makedirs(os.path.join(out_dir,"con"))
     with open(os.path.join(out_dir,"con", did + ".con"), "wb") as out_f:
         for s in document_tokens:
             same_labels = dict()
@@ -103,6 +106,8 @@ for did, txt in txt_dict.items():
 
 
     # print lines as txt files
+    if not os.path.exists(os.path.join(out_dir,"txt")):
+        os.makedirs(os.path.join(out_dir,"txt"))
     with open(os.path.join(out_dir, "txt", did + ".txt"), "wb") as txt_out:
         for sent in proc_sentences:
             for i, tok in enumerate(sent):
