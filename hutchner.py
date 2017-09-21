@@ -179,12 +179,15 @@ def json2html(json, algo):
               "hospital_name": "#80ff80"
               }
 
-    header="<span style=\"color:#f44141\">Definite Negated</span> " \
-               "<span style=\"color:#ff7c00\">Probable Negated</span> " \
-               "<span style=\"color:#ffec48\">Ambivalent Negated</span> " \
-               "<span style=\"background-color:#DDA0DD\">Problem</span> " \
-               "<span style=\"background-color:#9df033\">Treatment</span> " \
-               "<span style=\"background-color:#61e9ff\">Test</span><br><br> "
+    ## Commented out the header because a better way to approach would
+    ## be to dynamically produce this header based on the tags present in the text
+    # header="<span style=\"color:#f44141\">Definite Negated</span> " \
+    #            "<span style=\"color:#ff7c00\">Probable Negated</span> " \
+    #            "<span style=\"color:#ffec48\">Ambivalent Negated</span> " \
+    #            "<span style=\"background-color:#DDA0DD\">Problem</span> " \
+    #            "<span style=\"background-color:#9df033\">Treatment</span> " \
+    #            "<span style=\"background-color:#61e9ff\">Test</span><br><br> "
+    header=""
     return _render(header, json, colors)
 
 def _render(header, json, colors):
