@@ -2,13 +2,37 @@
 #
 # Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 #
+'''
+This script takes a BRAT directory containing .ann and .txt files (among possible other format types as well)
+and converts the .ann and .txt files into the i2b2 training directory format in the defined
+output directory.
+
+EG:
+{DIR}/brat_data/train/           <------The input dir
+                  |-file1.ann
+                  |-file2.ann
+                  |-config.conf
+                  |-file1.txt
+                  |-file2.txt
+
+
+{DIR}/i2b2_data/train/           <------The output dir
+                  |-concept
+                  |    |-file1.con
+                  |    |-file2.con
+                  |    |-etc
+                  |-txt
+                  |    |-file1.txt
+                  |    |-file2.txt
+
+'''
 import os
 import re
 import spacy
 
 # directory where brat .txt and .ann files live
-in_dir = "/home/wlane/Applications/brat-v1.3_Crunchy_Frog/data/train_batch_20"
-out_dir = "/home/wlane/PycharmProjects/HutchNER_API/NERScripts/b2i2b2_out"
+in_dir = "/home/wlane/bratserv/PHI_training_data_w"
+out_dir = "/home/wlane/nethome/i2b2_data/deidentification"
 nlp = spacy.load('en')
 
 # read documents into memory
@@ -112,7 +136,7 @@ for did, txt in txt_dict.items():
         for sent in proc_sentences:
             for i, tok in enumerate(sent):
                 if "\n" not in tok.orth_:
-                    txt_out.write(tok.orth_)
+                    txt_out.write(tok.orth_.encode("utf-8"))
                     if i < len(sent):
                         txt_out.write(" ")
             txt_out.write("\n")

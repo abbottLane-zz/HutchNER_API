@@ -21,7 +21,7 @@ class NERExtraction:
     """
     The object driving the Clinical concept extraction Testing pipeline
     """
-    def __init__(self, documents, model_algo="crf"):
+    def __init__(self, documents, model_algo="crf_ner"):
         self.model_algo = model_algo
         self.documents = documents
         self.clusters = Clusters(os.path.join(os.path.dirname(__file__),os.path.join("..","NERResources","Cluster_Files",
@@ -37,16 +37,16 @@ class NERExtraction:
         Initiates concept extraction testing pipeline over all files in self.data_dir
         :return: list of Document objects where Document.predicted has been populated with CRF predictions
         """
-        if self.model_algo.lower() == "lstm": # Use the LSTM model and decoder
+        if "lstm" in self.model_algo.lower(): # Use the LSTM model and decoder
             docs = self.documents
-            tags_and_toks_by_doc_id = predict_lstm.main(docs, models["lstm_ner"])
+            tags_and_toks_by_doc_id = predict_lstm.main(docs, models[self.model_algo.lower()])
             docs = self._combine_docs_and_predictions(docs, tags_and_toks_by_doc_id)
             print ("Finished LSTM classification")
             return docs
 
-        elif self.model_algo.lower() == "crf": # USe CRF model and decoder
+        else: # USe CRF model and decoder
             docs = self.documents
-            self._extract(docs, models["crf_ner"], "crf_ner")
+            self._extract(docs, models[ self.model_algo.lower()],  self.model_algo.lower())
             print("Finished CRF classification")
             return docs
 

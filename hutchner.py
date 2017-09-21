@@ -18,11 +18,13 @@
 import os
 
 import requests
+import sys
 from flask import Flask, make_response, jsonify, request, render_template, g, json
 from os.path import isfile, join
 
 from sklearn.externals import joblib
 
+from Dates import date_finder
 from LSTMExec.model import Model
 from Pipelines import ner_negation, ner, general_ner
 from flask_oauthlib.provider import OAuth2Provider
@@ -57,7 +59,10 @@ def load_lstm_model(model_dir):
 spacy_model = en_core_web_sm.load()
 lstm_ner_model= load_lstm_model(model_dir=os.path.join(os.path.dirname(__file__), os.path.join("LSTMExec","models","i2b2_fh_50_newlines")))
 crf_ner_model= joblib.load(os.path.join(os.path.dirname(__file__), os.path.join("NERResources","Models", "model-test_problem_treatment.pk1")))
-models={"crf_ner":crf_ner_model, "lstm_ner":lstm_ner_model, "spacy":spacy_model}
+crf_deid_model = joblib.load(os.path.join(os.path.dirname(__file__), os.path.join("NERResources","Models",
+                                                                                  "model-phone_number_age_profession_ward_name_date_provider_name_address_and_components_patient_or_family_name_hospital_name.pk1")))
+## IMPORTANT: if the model is an LSTM model, "lstm" MUST be found in the key name somewhere, otherwise crf is assumed
+models={"crf_ner":crf_ner_model, "lstm_ner":lstm_ner_model, "spacy":spacy_model, "deid_crf":crf_deid_model}
 
 app = Flask(__name__)
 oauth=OAuth2Provider(app)
@@ -69,10 +74,17 @@ oauth=OAuth2Provider(app)
 def general_ner_pipeline():
     documents = request.json
     if documents:
+        dt = date_finder.DateFinder()
+        for doc_id, doc_txt in documents.items():
+
+            for actual_date_string, indexes, captures in dt.extract_date_strings(doc_txt):
+                #logger.debug("Str: {}, idx: {}".format(actual_date_string, indexes))
+                p=0
         json_response = general_ner.main(documents, models['spacy'])
         return json_response.encode('utf-8')
     else:
         return make_response(jsonify({'error': 'No data provided'}), 400)
+
 
 @app.route('/ner/<string:alg_type>', methods=['GET'])
 def ner_pipeline(alg_type):
@@ -119,10 +131,7 @@ def submit_textarea():
     url = 'https://nlp-brat-prod01.fhcrc.org/hutchner/ner_neg/'
     json_request_data = json.loads(request.data)
     algo_type = json_request_data['algo']
-    if algo_type == "spacy_ner":
-        url = 'https://nlp-brat-prod01.fhcrc.org/hutchner/gen_ner/'
-    else:
-        url += algo_type
+    url += algo_type
     data={"1":json_request_data['text']}
     headers = {"content-type": "application/json"}
     response = requests.get(url, json=data, headers=headers)
@@ -141,6 +150,15 @@ def load_data(data_dir):
 
 
 def json2html(json, algo):
+    '''
+    Converts HutchNER's JSON response into a renderable HTML page
+
+    Make sure if you add new models that you add tag color entries to this dictionary
+    otherwise HitchNER Demo will not be able to render the results
+    :param json: a JSON object retrieved from HutchNER API
+    :param algo: the particular algorithm model called to produce this output
+    :return: a string containing the HTML rendering of the data
+    '''
     colors = {"problem": "#DDA0DD",
               "treatment": "#9df033",
               "test": "#61e9ff",
@@ -150,69 +168,49 @@ def json2html(json, algo):
               "i-treatment": "#9df033",
               "b-test": "#61e9ff",
               "i-test": "#61e9ff",
-              "quantity":"#ff6699",
-              "gpe":"#9999ff",
-              "person":"#33ccff",
-              "norp":"#00cc99",
-              "facility":"#0099cc",
-              "org":"#99ff33",
-              "loc":"#cc00ff",
-              "product":"#ff0000",
-              "event":"#cc0099",
-              "work_of_art":"#3333ff",
-              "language":"#ccff33",
-              "date":"#339933",
-              "time":"#ccffff",
-              "percent":"#99cc00",
-              "money":"#cc33ff",
-              "ordinal":"#ff0066",
-              "cardinal":"#0099ff"
+              "date":"#80ccff",
+              "patient_or_family_name":"#ccfff5",
+              "age":"#cc99ff",
+              "phone_number":"#ff99ff",
+              "profession":"#ff99cc",
+              "ward_name" :"#ff8080",
+              "provider_name": "#ffe066",
+              "address_and_components": "#bfff80",
+              "hospital_name": "#80ff80"
               }
 
-    header=""
-    if algo == "crf" or algo =="lstm":
-        header="<span style=\"color:#f44141\">Definite Negated</span> " \
+    header="<span style=\"color:#f44141\">Definite Negated</span> " \
                "<span style=\"color:#ff7c00\">Probable Negated</span> " \
                "<span style=\"color:#ffec48\">Ambivalent Negated</span> " \
                "<span style=\"background-color:#DDA0DD\">Problem</span> " \
                "<span style=\"background-color:#9df033\">Treatment</span> " \
                "<span style=\"background-color:#61e9ff\">Test</span><br><br> "
-    elif algo == "spacy_ner":
-        header ="<span style=\"background-color:#ff6699\">Quantity</span> " \
-               "<span style=\"background-color:#9999ff\">GPE</span> " \
-               "<span style=\"background-color:#33ccff\">Person</span> " \
-               "<span style=\"background-color:#00cc99\">NORP</span> " \
-               "<span style=\"background-color:#0099cc\">Facility</span> " \
-               "<span style=\"background-color:#99ff33\">Org</span><br><br> " \
-                "<span style=\"background-color:#cc00ff\">Loc</span> " \
-                "<span style=\"background-color:#ff0000\">Product</span> " \
-                "<span style=\"background-color:#cc0099\">Event</span> " \
-                "<span style=\"background-color:#3333ff\">work_of_art</span> " \
-                "<span style=\"background-color:#ccff33\">Language</span><br><br> " \
-                "<span style=\"background-color:#339933\">Date</span> " \
-                "<span style=\"background-color:#ccffff\">Time</span> " \
-                "<span style=\"background-color:#99cc00\">Percent</span> " \
-                "<span style=\"background-color:#9df033\">Money</span> " \
-                "<span style=\"background-color:#ff0066\">Ordinal</span><br><br> " \
-                "<span style=\"background-color:#0099ff\">Cardinal</span><br><br> "
+    return _render(header, json, colors)
 
+def _render(header, json, colors):
     tokens = json['1']['NER_labels']
-    in_span=False
+    in_span = False
     for token in tokens:
         if not in_span:
             if token['label'] != "O":
-                in_span=True
-                header+= "<span type=\""+token['label']+"\" style=\"background-color:"+colors[token['label'].lower()]+ insert_negation_color(token)+"\">"
+                in_span = True
+                header += "<span type=\"" + token['label'] + "\" style=\"background-color:" + colors[
+                    token['label'].lower()] + insert_negation_color(token) + "\">"
 
         if in_span:
-            if token['label'] =="O":
+            if token['label'] == "O":
                 in_span = False
-                header+="</span>"
+                header += "</span>"
         header += token['text'] + " "
 
         if token['text'] == ".":
             header += "<br>"
+    # except:
+    #     e = sys.exc_info()[0]
+    #     return "<p>Error: " + str(e.message) + "</p>"
     return header
+
+
 
 
 def insert_negation_color(token):
