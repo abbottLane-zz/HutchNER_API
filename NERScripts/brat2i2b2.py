@@ -31,8 +31,8 @@ import re
 import spacy
 
 # directory where brat .txt and .ann files live
-in_dir = "/home/wlane/bratserv/PHI_training_data_w"
-out_dir = "/home/wlane/nethome/i2b2_data/deidentification"
+in_dir = "/home/wlane/bratserv/PHI_testing_data_e"
+out_dir = "/home/wlane/nethome/i2b2_data/deidentification_test"
 nlp = spacy.load('en')
 
 # read documents into memory

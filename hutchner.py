@@ -179,8 +179,8 @@ def json2html(json, algo):
               "hospital_name": "#80ff80"
               }
 
-    ## Commented out the header because a better way to approach would
-    ## be to dynamically produce this header based on the tags present in the text
+    # Commented out the header because a better way to approach would
+    # be to dynamically produce this header based on the tags present in the text
     # header="<span style=\"color:#f44141\">Definite Negated</span> " \
     #            "<span style=\"color:#ff7c00\">Probable Negated</span> " \
     #            "<span style=\"color:#ffec48\">Ambivalent Negated</span> " \
@@ -189,6 +189,7 @@ def json2html(json, algo):
     #            "<span style=\"background-color:#61e9ff\">Test</span><br><br> "
     header=""
     return _render(header, json, colors)
+
 
 def _render(header, json, colors):
     tokens = json['1']['NER_labels']
@@ -199,7 +200,6 @@ def _render(header, json, colors):
                 in_span = True
                 header += "<span type=\"" + token['label'] + "\" style=\"background-color:" + colors[
                     token['label'].lower()] + insert_negation_color(token) + "\">"
-
         if in_span:
             if token['label'] == "O":
                 in_span = False
@@ -208,12 +208,7 @@ def _render(header, json, colors):
 
         if token['text'] == ".":
             header += "<br>"
-    # except:
-    #     e = sys.exc_info()[0]
-    #     return "<p>Error: " + str(e.message) + "</p>"
     return header
-
-
 
 
 def insert_negation_color(token):
